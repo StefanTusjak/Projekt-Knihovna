@@ -468,8 +468,73 @@ def list_loans():
 ---
 
 ## 🔬 11. Funkce `run_tests()`
-- Spustí `test_init.py` pro vytvoření testovací databáze/tabulek.
-- Nabídne spuštění jednotlivých testovacích případů přes `pytest`.
+- Spustí `test_init.py` pro vytvoření testovací databáze/tabulek. Nabídne spuštění jednotlivých testovacích případů přes `pytest`.
+```python
+def run_tests():
+    # Nejdříve vytvoříme test tabulky
+    subprocess.run(["python", "test_init.py"])
+
+    print("\n🔬 Co chceš testovat?")
+    print("1 – Přidání knihy")
+    print("2 – Přidání člena")
+    print("3 – Výpůjčka knihy")
+    print("4 – Vrácení knihy")
+    print("5 – Spustit vše")
+    print("0 – Zpět do menu")
+
+    choice = input("Zadej číslo testu: ")
+
+    tests = {
+        "1": "test_library.py::test_add_book",
+        "2": "test_library.py::test_add_member",
+        "3": "test_library.py::test_loan_book",
+        "4": "test_library.py::test_return_book",
+        "5": "test_library.py"
+    }
+
+    if choice in tests:
+        print("\n🧪 Spouštím test...")
+        subprocess.run(["pytest", "-v", tests[choice]])
+    elif choice == "0":
+        return
+    else:
+        print("⚠️ Neplatná volba.")
+```
+
+**subprocess.run(["python", "test_init.py"])** 
+- Spustí skript `test_init.py`, který slouží k přípravě databáze nebo vytvoření testovacích tabulek.
+- Spouští se pomocí modulu subprocess, který umožňuje volat externí příkazy jako v terminálu.
+
+**Výběr testovacího scénáře:**
+- print(...) - Vypíše nabídku testovacích scénářů, které může uživatel spustit.
+
+**choice = input("Zadej číslo testu: ")**
+- Načte od uživatele volbu jako textový řetězec (např. "1" nebo "5").
+
+**Slovník `tests`**
+```python
+tests = {
+    "1": "test_library.py::test_add_book",
+    "2": "test_library.py::test_add_member",
+    "3": "test_library.py::test_loan_book",
+    "4": "test_library.py::test_return_book",
+    "5": "test_library.py"
+}
+```
+- Obsahuje přiřazení mezi volbou uživatele a konkrétním testem, který se má spustit.
+- `::` v názvu říká Pytestu, který konkrétní testovací případ z daného souboru spustit.
+
+# Spuštění testu:
+**if choice in tests:**
+- Ověří, zda je zadaná volba platná.
+
+**subprocess.run(["pytest", "-v", tests[choice]])**
+- Spustí Pytest s parametrem `-v` (verbose), aby byly zobrazeny podrobnosti o prováděných testech.
+
+# Ostatní možnosti:
+**elif choice == "0":** - Uživatel se může vrátit do hlavního menu.
+
+**else:** - Zobrazí chybovou hlášku, pokud uživatel zadal neplatné číslo.
 
 ---
 
