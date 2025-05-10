@@ -380,6 +380,37 @@ def list_books():
 
 ## 👥 9. Funkce `list_members()`
 Vypíše všechny členy z tabulky `Members`.
+```python
+def list_members():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MemberID, Name, Email FROM Members")
+    print("\n👥 Seznam členů:")
+    for row in cursor.fetchall():
+        print(f"{row[0]} – {row[1]} ({row[2]})")
+    cursor.close()
+    conn.close()
+```
+**conn = get_connection()** - Naváže připojení k databázi.
+
+**cursor = conn.cursor()** - Vytvoří kurzor, který umožňuje spouštět SQL příkazy.
+
+**cursor.execute("SELECT MemberID, Name, Email FROM Members")** 
+- Spustí SQL dotaz, který načte všechna data z tabulky Members.
+- Vybírá konkrétně ID člena, jméno a e-mail.
+
+**print("\n👥 Seznam členů:")**
+- Vypíše nadpis před výpisem dat.
+
+# Výpis dat:
+**for row in cursor.fetchall():**
+- Prochází všechny řádky výsledku dotazu.
+- Každý řádek obsahuje (MemberID, Name, Email).
+
+**print(f"{row[0]} – {row[1]} ({row[2]})")**
+- Vypíše informace o členu ve formátu: `1 – Jan Novák (jan@example.com)`
+
+**cursor.close() a conn.close()** - Ukončí práci s databází a uzavřou připojení.
 
 ---
 
