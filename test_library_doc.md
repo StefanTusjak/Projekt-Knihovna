@@ -164,6 +164,63 @@ def test_add_member(db_connection):
 - Po výpůjčce se zkontroluje, že kniha již není dostupná (`Available = FALSE`).
 - Po testu probíhá kompletní úklid.
 
+```python
+def test_loan_book(db_connection):
+    cursor = db_connection.cursor()
+
+    # Vložení knihy a člena
+    cursor.execute("INSERT INTO Books (Title, Author) VALUES ('Test půjčka', 'Autor P')")
+    cursor.execute("INSERT INTO Members (Name, Email) VALUES ('Čtenář', 'pujcka@example.com')")
+    db_connection.commit()
+
+    cursor.execute("SELECT BookID FROM Books WHERE Title = 'Test půjčka'")
+    book_id = cursor.fetchone()[0]
+    cursor.execute("SELECT MemberID FROM Members WHERE Email = 'pujcka@example.com'")
+    member_id = cursor.fetchone()[0]
+
+    # Výpůjčka
+    cursor.execute("INSERT INTO Loans (BookID, MemberID, LoanDate) VALUES (%s, %s, CURDATE())", (book_id, member_id))
+    cursor.execute("UPDATE Books SET Available = FALSE WHERE BookID = %s", (book_id,))
+    db_connection.commit()
+
+    cursor.execute("SELECT Available FROM Books WHERE BookID = %s", (book_id,))
+    available = cursor.fetchone()[0]
+
+    # Úklid – smažeme vše
+    cursor.execute("DELETE FROM Loans WHERE BookID = %s", (book_id,))
+    cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id,))
+    cursor.execute("DELETE FROM Members WHERE MemberID = %s", (member_id,))
+    db_connection.commit()
+
+    cursor.close()
+    assert available == 0
+```
+#### Vytvoření testovacích dat:
+- Vloží se jedna kniha a jeden člen do databáze pomocí dvou INSERT příkazů.
+- Následuje `commit()`, aby byly záznamy trvale uloženy.
+
+#### Získání ID:
+`book_id = cursor.fetchone()[0]`
+- Po dotazu na knihu a člena pomocí `SELECT`, se získá jejich `BookID` a `MemberID`, které budeme potřebovat pro výpůjčku.
+
+#### Simulace výpůjčky:
+- Kniha je zapůjčena - vytvoří se záznam v tabulce Loans s dnešním datem `(CURDATE()`).
+- Stav knihy se aktualizuje na `Available = FALSE`, aby se označila jako nedostupná.
+
+#### Kontrola:
+```python
+available = cursor.fetchone()[0]
+assert available == 0
+```
+- Ověříme, že sloupec `Available` je nyní nastaven na 0 (což odpovídá FALSE).
+- Pokud ano, test projde.
+
+#### Úklid:
+- Všechny testovací záznamy (výpůjčka, kniha, člen) se odstraní.
+- Na závěr se připojení uzavře.
+
+---
+
 ### `test_return_book`
 - Testuje vrácení knihy – nastavuje `ReturnDate` a mění `Available` zpět na `TRUE`.
 - Obsahuje úklid testovacích dat.
