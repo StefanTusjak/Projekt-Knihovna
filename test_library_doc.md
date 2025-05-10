@@ -224,6 +224,96 @@ assert available == 0
 ### `test_return_book`
 - Testuje vrácení knihy – nastavuje `ReturnDate` a mění `Available` zpět na `TRUE`.
 - Obsahuje úklid testovacích dat.
+```python
+def test_return_book(db_connection):
+    cursor = db_connection.cursor()
+
+    # Připravíme záznam pro test vrácení
+    cursor.execute("INSERT INTO Books (Title, Author, Available) VALUES ('Vrácená', 'Autor V', FALSE)")
+    cursor.execute("INSERT INTO Members (Name, Email) VALUES ('Vrácený Člen', 'vratka@example.com')")
+    db_connection.commit()
+
+    cursor.execute("SELECT BookID FROM Books WHERE Title = 'Vrácená'")
+    book_id = cursor.fetchone()[0]
+    cursor.execute("SELECT MemberID FROM Members WHERE Email = 'vratka@example.com'")
+    member_id = cursor.fetchone()[0]
+
+    # Vložíme výpůjčku bez ReturnDate
+    cursor.execute("INSERT INTO Loans (BookID, MemberID, LoanDate) VALUES (%s, %s, CURDATE())", (book_id, member_id))
+    db_connection.commit()
+
+    cursor.execute("SELECT LoanID FROM Loans WHERE BookID = %s AND ReturnDate IS NULL", (book_id,))
+    loan_id = cursor.fetchone()[0]
+
+    # Vrácení
+    cursor.execute("UPDATE Loans SET ReturnDate = CURDATE() WHERE LoanID = %s", (loan_id,))
+    cursor.execute("UPDATE Books SET Available = TRUE WHERE BookID = %s", (book_id,))
+    db_connection.commit()
+
+    cursor.execute("SELECT Available FROM Books WHERE BookID = %s", (book_id,))
+    available = cursor.fetchone()[0]
+
+    # Úklid – smažeme záznamy
+    cursor.execute("DELETE FROM Loans WHERE LoanID = %s", (loan_id,))
+    cursor.execute("DELETE FROM Books WHERE BookID = %s", (book_id,))
+    cursor.execute("DELETE FROM Members WHERE MemberID = %s", (member_id,))
+    db_connection.commit()
+
+    cursor.close()
+    assert available == 1
+```
+#### Vytvoření testovacích dat:
+```python
+cursor.execute("INSERT INTO Books (...)")
+cursor.execute("INSERT INTO Members (...)")
+```
+- Do databáze vložíme jednu nedostupnou knihu (Available = FALSE) a jednoho člena.
+
+**db_connection.commit()**
+- Potvrzení změn - bez něj by záznamy nebyly uložené.
+
+#### Získání ID:
+```python
+book_id = cursor.fetchone()[0]
+member_id = cursor.fetchone()[0]
+```
+- Zjišťujeme ID vložené knihy a člena, které budeme potřebovat pro záznam výpůjčky.
+
+#### Výpůjčka (bez vrácení):
+```python
+INSERT INTO Loans (...) VALUES (..., ..., CURDATE())
+```
+- Vložíme nový záznam do tabulky `Loans`, ale `ReturnDate` necháme prázdné - výpůjčka ještě nebyla vrácena.
+
+**loan_id = cursor.fetchone()[0]**
+- Získáme `LoanID` výpůjčky, která nemá vyplněné `ReturnDate`.
+
+#### Vrácení knihy:
+```python
+UPDATE Loans SET ReturnDate = CURDATE() WHERE LoanID = %s
+UPDATE Books SET Available = TRUE WHERE BookID = %s
+```
+- Nastavíme aktuální datum vrácení (`ReturnDate`) u výpůjčky.
+- Označíme knihu jako opět dostupnou (`Available = TRUE`).
+
+#### Ověření:
+```python
+available = cursor.fetchone()[0]
+assert available == 1
+```
+- Ověříme, že je kniha opět dostupná.
+- Hodnota 1 znamená TRUE, tedy že kniha byla vrácena správně.
+
+#### Úklid:
+```python
+DELETE FROM Loans ...
+DELETE FROM Books ...
+DELETE FROM Members ...
+```
+- Všechny záznamy vytvořené během testu smažeme, aby testy zůstaly nezávislé a databáze čistá.
+
+
+---
 
 ### `test_duplicate_member_email_raises_error`
 - Testuje, že při pokusu o vložení člena se stejným e-mailem vznikne chyba (`IntegrityError`).
