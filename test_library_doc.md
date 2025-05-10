@@ -319,6 +319,55 @@ DELETE FROM Members ...
 - Testuje, že při pokusu o vložení člena se stejným e-mailem vznikne chyba (`IntegrityError`).
 - Potvrzuje správné fungování omezení `UNIQUE` na sloupci `Email`.
 
+```python
+def test_duplicate_member_email_raises_error(db_connection):
+    cursor = db_connection.cursor()
+    cursor.execute("INSERT INTO Members (Name, Email) VALUES ('První', 'dup@example.com')")
+    db_connection.commit()
+
+    with pytest.raises(mysql.connector.errors.IntegrityError):
+        cursor.execute("INSERT INTO Members (Name, Email) VALUES ('První', 'dup@example.com')")
+        db_connection.commit()
+
+    # Úklid
+    cursor.execute("DELETE FROM Members WHERE Email = 'dup@example.com'")
+    db_connection.commit()
+    cursor.close()
+```
+**cursor = db_connection.cursor()**
+- Otevření kurzoru pro komunikaci s databází.
+
+#### Vložení prvního záznamu:
+```python
+cursor.execute("INSERT INTO Members (...)")
+db_connection.commit()
+```
+- Vložíme testovacího člena s e-mailem dup@example.com.
+- Tento e-mail je jedinečný (UNIQUE), takže další pokus o vložení stejného e-mailu musí selhat.
+
+##### Očekávání chyby:
+```python
+with pytest.raises(mysql.connector.errors.IntegrityError):
+    ...
+```
+- Pomocí `pytest.raises(...)` očekáváme, že daný blok vyvolá chybu.
+- V tomto případě jde o `IntegrityError`, protože e-mail porušuje unikátní omezení ve sloupci Email.
+
+- Co se testuje? - Test kontroluje, zda databáze správně odmítne pokus o vložení duplicity.
+
+#### Úklid:
+```python
+cursor.execute("DELETE FROM Members WHERE Email = 'dup@example.com'")
+db_connection.commit()
+```
+- Smažeme testovací záznam, aby další testy mohly pokračovat bez konfliktu.
+
+**cursor.close()** - Uzavření kurzoru po dokončení testu.
+
+#### Shrnutí:
+- Test projde pouze tehdy, pokud druhý pokus o vložení stejného e-mailu skutečně selže a vyvolá očekávanou chybu. Pokud chyba nenastane (např. pokud by tabulka neobsahovala UNIQUE omezení), test selže.
+
+
 ---
 
 📌 **Poznámka:**
