@@ -286,9 +286,54 @@ VALUES (%s, %s, CURDATE())
 ---
 
 ## 📗 7. Funkce `return_book()`
-- Načte ID půjčky a knihy.
-- U půjčky nastaví datum vrácení (`ReturnDate = CURDATE()`).
-- U knihy nastaví `Available = TRUE`.
+- Načte ID půjčky a knihy. U půjčky nastaví datum vrácení (`ReturnDate = CURDATE()`). U knihy nastaví `Available = TRUE`.
+```python
+def return_book():
+    loan_id = int(input("ID půjčky: "))
+    book_id = int(input("ID knihy: "))
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Loans SET ReturnDate = CURDATE() WHERE LoanID = %s", (loan_id,))
+    cursor.execute("UPDATE Books SET Available = TRUE WHERE BookID = %s", (book_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("📗 Kniha byla vrácena.")
+```
+
+**loan_id = int(input("ID půjčky: "))**
+- Zobrazí výzvu k zadání ID výpůjčky, kterou chceme označit jako vrácenou.
+- Hodnota se převede na celé číslo a uloží do `loan_id`.
+
+**book_id = int(input("ID knihy: "))**
+- Uživatel zadá ID vracené knihy.
+- Hodnota se převede na celé číslo a uloží do `book_id`.
+
+**conn = get_connection()**
+- Připojení k databázi.
+
+**cursor = conn.cursor()**
+- Otevře kurzor pro provádění SQL dotazů.
+
+# Aktualizace výpůjčky:
+`cursor.execute("UPDATE Loans SET ReturnDate = CURDATE() WHERE LoanID = %s", (loan_id,))`
+- Nastaví aktuální datum (`CURDATE()`) jako datum vrácení pro danou výpůjčku.
+- Vyhledání výpůjčky probíhá podle zadaného `LoanID`.
+
+# Aktualizace dostupnosti knihy:
+` cursor.execute("UPDATE Books SET Available = TRUE WHERE BookID = %s", (book_id,))`
+- Změní stav knihy na dostupnou (`Available = TRUE`), aby ji bylo možné znovu vypůjčit.
+
+---
+
+**conn.commit()**
+- Potvrdí obě změny - vrácení knihy i její znovuzpřístupnění.
+
+**cursor.close() a conn.close()**
+- Uzavřou kurzor a připojení k databázi.
+
+**print("📗 Kniha byla vrácena.")**
+- Informuje uživatele, že vrácení knihy bylo úspěšné.
 
 ---
 
