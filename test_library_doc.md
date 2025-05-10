@@ -66,6 +66,48 @@ def db_connection():
 ### `test_add_book`
 - Ověřuje, že po přidání knihy do databáze ji lze správně vyhledat.
 - Po testu se testovací záznam odstraní.
+```python
+def test_add_book(db_connection):
+    cursor = db_connection.cursor()
+    cursor.execute("INSERT INTO Books (Title, Author) VALUES ('Testovací kniha', 'Autor Test')")
+    db_connection.commit()
+
+    cursor.execute("SELECT * FROM Books WHERE Title = 'Testovací kniha'")
+    result = cursor.fetchone()
+
+    # Úklid – smažeme testovací knihu
+    cursor.execute("DELETE FROM Books WHERE Title = 'Testovací kniha'")
+    db_connection.commit()
+
+    cursor.close()
+    assert result is not None
+```
+**cursor = db_connection.cursor()**
+- Vytvoří kurzor pro provádění SQL příkazů pomocí předané testovací databáze.
+
+**cursor.execute("INSERT INTO Books ...")**
+- Vloží testovací knihu s pevně daným názvem a autorem do tabulky Books.
+
+**db_connection.commit()**
+- Potvrdí změnu - bez toho by se testovací záznam fyzicky neuložil do databáze.
+
+**cursor.execute("SELECT * FROM Books WHERE Title = 'Testovací kniha'")**
+- Pokusí se najít záznam o právě vložené knize podle jejího názvu.
+
+**result = cursor.fetchone()**
+- Načte jeden řádek z výsledku - buď najde záznam, nebo vrátí `None`.
+
+#### Úklid po testu:
+**cursor.execute("DELETE FROM Books WHERE Title = 'Testovací kniha'")**
+- Smaže testovací knihu, aby databáze zůstala čistá pro další testy.
+
+**db_connection.commit()**
+- Potvrdí odstranění záznamu.
+
+#### ✅ Vyhodnocení testu:
+**assert result is not None**
+- Test projde pouze tehdy, pokud se záznam v databázi opravdu našel.
+- Pokud ne, test selže - znamená to, že vložení neproběhlo správně.
 
 ### `test_add_member`
 - Testuje vložení nového člena a kontrolu podle e-mailu.
