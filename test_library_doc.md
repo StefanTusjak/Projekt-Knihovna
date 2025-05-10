@@ -109,9 +109,55 @@ def test_add_book(db_connection):
 - Test projde pouze tehdy, pokud se záznam v databázi opravdu našel.
 - Pokud ne, test selže - znamená to, že vložení neproběhlo správně.
 
+---
+
 ### `test_add_member`
 - Testuje vložení nového člena a kontrolu podle e-mailu.
 - Zajišťuje úklid odstraněním testovacího člena.
+```python
+def test_add_member(db_connection):
+    cursor = db_connection.cursor()
+    cursor.execute("INSERT INTO Members (Name, Email) VALUES ('Tester', 'test@example.com')")
+    db_connection.commit()
+
+    cursor.execute("SELECT * FROM Members WHERE Email = 'test@example.com'")
+    result = cursor.fetchone()
+
+    # Úklid – smažeme testovacího člena
+    cursor.execute("DELETE FROM Members WHERE Email = 'test@example.com'")
+    db_connection.commit()
+
+    cursor.close()
+    assert result is not None
+```
+**cursor = db_connection.cursor()**
+- Vytváří kurzor pro provádění SQL příkazů na testovací databázi.
+
+**cursor.execute("INSERT INTO Members ...")**
+- Vloží nového člena s pevně daným jménem a e-mailem do tabulky Members.
+
+**db_connection.commit()**
+- Uloží změnu v databázi - bez potvrzení by se záznam neuložil.
+
+**cursor.execute("SELECT * FROM Members WHERE Email = 'test@example.com'")**
+- Hledá právě vloženého člena podle e-mailové adresy.
+
+**result = cursor.fetchone()**
+- Získá jeden výsledek dotazu - buď záznam existuje, nebo vrátí `None`.
+
+#### 🧹 Úklid po testu:
+**cursor.execute("DELETE FROM Members WHERE Email = 'test@example.com'")**
+- Odstraní testovacího člena, aby databáze zůstala čistá pro další testy.
+
+**db_connection.commit()**
+- Potvrdí smazání.
+
+#### ✅ Vyhodnocení:
+**assert result is not None**
+- Test projde, pokud byl záznam o členu úspěšně nalezen.
+- Pokud ne, test selže, což znamená, že vložení neproběhlo správně.
+
+---
 
 ### `test_loan_book`
 - Ověřuje proces výpůjčky knihy.
