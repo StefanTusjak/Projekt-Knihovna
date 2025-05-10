@@ -30,12 +30,34 @@ from test_init import create_test_tables
 ## 🔧 Fixtures
 
 ### `setup_test_db()`
-- Automaticky se spouští při startu testovací relace.
-- Vytvoří testovací databázové tabulky.
+```python
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_db():
+    create_test_tables()
+```
+- Tato fixture se spustí automaticky jednou za celou testovací relaci (`scope="session"` a `autouse=True`).
+- Volá funkci `create_test_tables()`, která vytvoří potřebné tabulky v testovací databázi.
+- Slouží jako příprava prostředí - zajistí, že testy mají s čím pracovat.
 
 ### `db_connection()`
-- Otevře připojení k testovací databázi `LibraryDB_test`.
-- Po dokončení testu připojení uzavře pomocí `yield`.
+```python
+@pytest.fixture(scope="module")
+def db_connection():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="1111",
+        database="LibraryDB_test"  # ⬅️ oddělená testovací databáze
+    )
+    yield conn
+    conn.close()
+```
+- Otevře připojení k databázi `LibraryDB_test`, určené pouze pro testování.
+- `yield conn` zpřístupní připojení testovací funkci, která jej použije.
+- Po dokončení všech testů v daném modulu se připojení automaticky zavře (`conn.close()`).
+
+**Parametr scope="module":**
+- Znamená, že jedno připojení k databázi je sdílené pro všechny testy v daném souboru (modulu).
 
 ---
 
