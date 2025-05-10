@@ -228,9 +228,60 @@ def add_member():
 ---
 
 ## 📕 6. Funkce `loan_book()`
-- Načte ID knihy a člena.
-- Vytvoří záznam do `Loans`.
-- Nastaví u knihy `Available = FALSE`.
+Načte ID knihy a člena. Vytvoří záznam do `Loans`. Nastaví u knihy `Available = FALSE`.
+```python
+def loan_book():
+    book_id = int(input("ID knihy: "))
+    member_id = int(input("ID člena: "))
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Loans (BookID, MemberID, LoanDate) VALUES (%s, %s, CURDATE())", (book_id, member_id))
+    cursor.execute("UPDATE Books SET Available = FALSE WHERE BookID = %s", (book_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("📕 Kniha byla vypůjčena.")
+```
+
+**book_id = int(input("ID knihy: "))**
+- Uživateli se zobrazí výzva k zadání ID knihy, kterou chce vypůjčit.
+- Hodnota se převede na celé číslo a uloží do proměnné `book_id`.
+
+**member_id = int(input("ID člena: "))**
+- Uživateli se zobrazí výzva k zadání ID člena, který si knihu půjčuje.
+- Hodnota se uloží do proměnné `member_id`.
+
+**conn = get_connection()**
+- Otevře připojení k databázi.
+
+**cursor = conn.cursor()**
+- Vytvoří kurzor pro provádění SQL dotazů.
+
+# Vložení výpůjčky:
+**cursor.execute(...)** - vložení záznamu do tabulky `Loans`
+```python
+INSERT INTO Loans (BookID, MemberID, LoanDate)
+VALUES (%s, %s, CURDATE())
+```
+- Vytvoří nový záznam o výpůjčce do tabulky `Loans`.
+- `CURDATE()` automaticky nastaví aktuální datum jako den výpůjčky.
+- `book_id` a `member_id` jsou dosazeny do dotazu jako hodnoty.
+
+# Aktualizace dostupnosti knihy:
+`cursor.execute("UPDATE Books SET Available = FALSE WHERE BookID = %s", (book_id,))`
+- Označí knihu jako nedostupnou (`Available = FALSE`).
+- Tím se zabrání její další výpůjčce, dokud nebude vrácena.
+
+---
+
+**conn.commit()**
+- Potvrdí obě změny - výpůjčku i úpravu dostupnosti.
+
+**cursor.close() a conn.close()**
+- Uzavřou kurzor i databázové připojení.
+
+**print("📕 Kniha byla vypůjčena.")**
+- Informuje uživatele, že výpůjčka proběhla úspěšně.
 
 ---
 
