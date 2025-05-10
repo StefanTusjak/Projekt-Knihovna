@@ -539,17 +539,64 @@ tests = {
 ---
 
 ## 📖 12. Funkce `menu()`
-Textové menu pro obsluhu knihovního systému:
+Textové menu pro obsluhu knihovního systému
 
-1. Přidání knihy  
-2. Přidání člena  
-3. Výpůjčka knihy  
-4. Vrácení knihy  
-5. Seznam knih  
-6. Seznam členů  
-7. Seznam půjček  
-8. Spuštění testů  
-0. Ukončení programu  
+```python
+def menu():
+    while True:
+        print("\n📖 KNIHOVNÍ MENU")
+        print("1. Přidat knihu")
+        print("2. Přidat člena")
+        print("3. Vypůjčit knihu")
+        print("4. Vrátit knihu")
+        print("5. Zobrazit knihy")
+        print("6. Zobrazit členy")
+        print("7. Zobrazit půjčky")
+        print("8. 🔬 Spustit testy")
+        print("0. Konec")
+        volba = input("Zadej volbu: ")
+
+        if volba == "1":
+            add_book()
+        elif volba == "2":
+            add_member()
+        elif volba == "3":
+            loan_book()
+        elif volba == "4":
+            return_book()
+        elif volba == "5":
+            list_books()
+        elif volba == "6":
+            list_members()
+        elif volba == "7":
+            list_loans()
+        elif volba == "8":
+            run_tests()
+        elif volba == "0":
+            print("👋 Ukončuji program.")
+            break
+        else:
+            print("⚠️ Neplatná volba!")
+```
+**while True:** - Nekonečná smyčka, která stále zobrazuje menu, dokud uživatel nezvolí konec ("0").
+
+**print(...)** - Vypíše nabídku možností pro uživatele. Každé číslo odpovídá jedné akci systému knihovny.
+
+**volba = input("Zadej volbu: ")** - Načte volbu uživatele jako řetězec.
+
+**Rozhodovací struktura if:**
+- Každá volba spouští konkrétní funkci podle zadání:
+- "1" → `add_book()` - přidání knihy
+- "2" → `add_member()` - přidání člena
+- "3" → `loan_book()` - vypůjčení knihy
+- "4" → `return_book()` - vrácení knihy
+- "5" → `list_books()` - seznam všech knih
+- "6" → `list_members()` - seznam členů
+- "7" → `list_loans()` - seznam výpůjček
+- "8" → `run_tests()` - spuštění testů
+- "0" → ukončení programu
+
+**else: print("⚠️ Neplatná volba!")** - Pokud uživatel zadá něco mimo nabízené možnosti, vypíše se upozornění.
 
 ---
 
