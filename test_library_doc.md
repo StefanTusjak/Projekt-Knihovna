@@ -13,9 +13,17 @@ import pytest
 from test_init import create_test_tables
 ```
 
-- `mysql.connector`: Připojení k MySQL databázi.
-- `pytest`: Knihovna pro spouštění testů.
-- `create_test_tables`: Pomocná funkce pro přípravu databáze před testováním.
+**import mysql.connector**
+- Načte knihovnu `mysql-connector-python`, která umožňuje komunikaci s MySQL databází.
+- Používá se k připojení, provádění dotazů a manipulaci s daty.
+
+**import pytest**
+- Importuje knihovnu pytest, která slouží k psaní a spouštění automatizovaných testů v Pythonu.
+- Umožňuje využívat funkce jako `@pytest.fixture`, `assert`, a `raises`.
+
+**from test_init import create_test_tables**
+- Importuje pomocnou funkci `create_test_tables` ze souboru `test_init.py`.
+- Tato funkce se stará o vytvoření databázových tabulek v testovací databázi (`LibraryDB_test`) před spuštěním samotných testů.
 
 ---
 
