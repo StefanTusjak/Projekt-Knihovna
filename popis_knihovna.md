@@ -339,6 +339,42 @@ def return_book():
 
 ## 📚 8. Funkce `list_books()`
 Vypíše všechny knihy z tabulky `Books` a jejich dostupnost (`Dostupná` nebo `Vypůjčená`).
+```python
+def list_books():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT BookID, Title, Author, Available FROM Books")
+    print("\n📚 Seznam knih:")
+    for row in cursor.fetchall():
+        stav = "Dostupná" if row[3] else "Vypůjčená"
+        print(f"{row[0]} – {row[1]} od {row[2]} ({stav})")
+    cursor.close()
+    conn.close()
+```
+
+**conn = get_connection()** - Naváže připojení k databázi.
+
+**cursor = conn.cursor()** - Vytvoří kurzor pro provádění SQL dotazů.
+
+**cursor.execute("SELECT BookID, Title, Author, Available FROM Books")**
+- Spustí SQL dotaz, který načte všechny knihy z databáze.
+- Dotaz vybírá čtyři sloupce: *ID knihy*, *název*, *autora* a *dostupnost* (Available).
+
+**print("\n📚 Seznam knih:")** - Vypíše nadpis pro uživatele v konzoli.
+
+# Výpis výsledků dotazu:
+
+**for row in cursor.fetchall():**
+- Prochází všechny řádky výsledku SQL dotazu.
+- Každý row obsahuje hodnoty ve formátu: (*BookID*, *Title*, *Author*, *Available*).
+
+**stav = "Dostupná" if row[3] else "Vypůjčená"**
+- Pokud je hodnota ve čtvrtém sloupci (*Available*) `True`, kniha je dostupná. Jinak je označena jako „Vypůjčená“.
+
+**print(f"{row[0]} – {row[1]} od {row[2]} ({stav})")**
+- Vytiskne jeden řádek informací o knize ve formátu: `1 – Název knihy od Autor (Dostupná/Vypůjčená)`
+
+**cursor.close() a conn.close()** -Ukončí práci s databází a uzavřou připojení.
 
 ---
 
