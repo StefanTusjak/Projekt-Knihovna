@@ -416,7 +416,55 @@ def list_members():
 
 ## 📄 10. Funkce `list_loans()`
 Spojí data z `Loans`, `Books` a `Members` a zobrazí seznam výpůjček včetně data vrácení (nebo označení „NEVRÁCENO“).
+```python
+def list_loans():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Loans.LoanID, Books.Title, Members.Name, LoanDate, ReturnDate
+        FROM Loans
+        JOIN Books ON Loans.BookID = Books.BookID
+        JOIN Members ON Loans.MemberID = Members.MemberID
+    """)
+    print("\n📄 Seznam půjček:")
+    for row in cursor.fetchall():
+        vraceno = row[4] if row[4] else "NEVRÁCENO"
+        print(f"#{row[0]}: {row[1]} – {row[2]} | Vypůjčeno: {row[3]} | Vráceno: {vraceno}")
+    cursor.close()
+    conn.close()
+```
 
+**conn = get_connection()** - Otevře připojení k databázi.
+
+**cursor = conn.cursor()** - Vytvoří kurzor pro provádění SQL příkazů.
+
+# Spojení tabulek pomocí SQL JOIN:
+**cursor.execute(""" ... """)**
+- SQL dotaz využívá JOIN, aby propojil tři tabulky:
+- `Loans` - hlavní tabulka půjček.
+- `Books` - spojení přes `Loans.BookID = Books.BookID`.
+- `Members` - spojení přes `Loans.MemberID = Members.MemberID`.
+
+**Dotaz vybírá:**
+- ID půjčky (LoanID)
+- Název knihy (Title)
+- Jméno člena (Name)
+- Datum výpůjčky (LoanDate)
+- Datum vrácení (ReturnDate)
+
+**print("\n📄 Seznam půjček:")** - Vytiskne nadpis sekce.
+
+# Výpis půjček:
+**for row in cursor.fetchall():**
+- Prochází všechny výsledky dotazu (každý řádek je jedna výpůjčka).
+
+**vraceno = row[4] if row[4] else "NEVRÁCENO"**
+- Pokud existuje datum vrácení (`ReturnDate`), uloží ho do proměnné `vraceno`.
+- Pokud je hodnota `None` (výpůjčka ještě nebyla vrácena), použije se text "NEVRÁCENO".
+
+**print(...)** - Výpis jedné půjčky ve formátu: `#1: Název knihy - Jméno člena | Vypůjčeno: 2025-05-01 | Vráceno: NEVRÁCENO`
+
+**cursor.close() a conn.close()** - Uzavře kurzor a připojení k databázi.
 ---
 
 ## 🔬 11. Funkce `run_tests()`
