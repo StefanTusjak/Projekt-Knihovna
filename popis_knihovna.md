@@ -601,7 +601,20 @@ def menu():
 ---
 
 ## 🧷 13. Blok `if __name__ == "__main__":`
-- Nejprve vytvoří tabulky (pokud ještě neexistují).
-- Spustí hlavní menu.
+```python
+if __name__ == "__main__":
+    create_tables()
+    menu()
+```
+**if __name__ == "__main__":**
+- Tento řádek říká: „Spusť následující kód pouze tehdy, když je tento skript spuštěn přímo (a ne importován jako modul).“
+- Díky tomu je možné tento soubor importovat do jiných Python skriptů (například pro testování), aniž by se automaticky spustil celý program.
+
+**create_tables()** 
+- Zavolá se funkce, která vytvoří databázové tabulky, pokud ještě neexistují.
+- Tím se zajistí, že program nebude padat kvůli chybějící databázi.
+
+**menu()**
+- Spustí hlavní ovládací rozhraní aplikace - zobrazí textové menu a umožní uživateli pracovat se systémem knihovny.
 
 ---
